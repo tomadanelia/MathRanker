@@ -17,16 +17,62 @@ enum Category {
   Geometry
   Mixed
 }
+enum GameStatus {
+Tie
+Win
+Lose
+}
+
 
 model User {
   id        String    @id @default(uuid())
   username  String    @unique
   email     String    @unique
   createdAt DateTime  @default(now())
-  ratings   Json      @default("{\"arithmetic\": {\"rating\": 1200, \"gamesPlayed\": 0}, \"algebra\": {\"rating\": 1200, \"gamesPlayed\": 0}, \"geometry\": {\"rating\": 1200, \"gamesPlayed\": 0}, \"mixed\": {\"rating\": 1200, \"gamesPlayed\": 0}}")  
-  stats     Json      @default("{\"highestWinStreaks\": {}, \"winLossRecords\": {}}")
-}
+  ratings   Rating[]
+  stats     Json      
+  firstPlayerGames  Game[] @relation("FirstPlayerGames")
+  secondPlayerGames Game[] @relation("SecondPlayerGames")
+  wonGames          Game[] @relation("WinnerGames")
+  }
+model Rating {
+  userId      String
+  category    Category
+  rating      Int              @default(1200)
+  gamesPlayed Int              @default(0)
 
+  user User @relation(fields: [userId], references: [id])
+
+  @@id([userId, category]) 
+}
+model Game {
+  id Int @id @default(autoincrement())
+  firstPlayerId String 
+  secondPlayerId String
+  winnerId String?
+  category Category
+  tie Boolean
+  firstPlayer  User @relation("FirstPlayerGames", fields: [firstPlayerId], references: [id], onDelete: Cascade)
+  secondPlayer User @relation("SecondPlayerGames", fields: [secondPlayerId], references: [id], onDelete: Cascade)
+  winner       User? @relation("WinnerGames", fields: [winnerId], references: [id], onDelete: SetNull)
+  gameRound    GameRound[]
+  }
+  
+enum QuestionStatus {
+Passed
+Failed
+Skipped
+  }
+  model GameRound{
+  id Int @id @default(autoincrement())
+  gameId Int
+  questionId Int
+  questionStatus QuestionStatus
+  points Int
+  question Question @relation(fields: [questionId],references: [id])
+  game     Game     @relation(fields: [gameId],references: [id])
+
+}
 model Question {
   id                  Int       @id @default(autoincrement())
   questionText        String
@@ -35,6 +81,6 @@ model Question {
   correctAnswer       String
   stepByStepSolution  String?   
   imageUrl            String?   
-  createdAt           DateTime  @default(now())
+  round               GameRound[]
   @@index([category, ratingBucket])
 }
