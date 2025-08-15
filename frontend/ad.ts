@@ -1,0 +1,1 @@
+console.log("Ad component loaded");
