@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma" 
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -17,12 +17,12 @@ enum Category {
   Geometry
   Mixed
 }
-enum GameStatus {
-Tie
-Win
-Lose
-}
 
+enum AnswerStatus {
+  Correct
+  Incorrect
+  Skipped
+}
 
 model User {
   id        String    @id @default(uuid())
@@ -30,48 +30,19 @@ model User {
   email     String    @unique
   createdAt DateTime  @default(now())
   ratings   Rating[]
-  stats     Json      
-  firstPlayerGames  Game[] @relation("FirstPlayerGames")
-  secondPlayerGames Game[] @relation("SecondPlayerGames")
-  wonGames          Game[] @relation("WinnerGames")
-  }
-model Rating {
-  userId      String
-  category    Category
-  rating      Int              @default(1200)
-  gamesPlayed Int              @default(0)
-
-  user User @relation(fields: [userId], references: [id])
-
-  @@id([userId, category]) 
+  stats     Json      @default("{\"highestWinStreaks\": {}, \"winLossRecords\": {}}")
+  gamesAsPlayerA GameHistory[] @relation("PlayerAGames")
+  gamesAsPlayerB GameHistory[] @relation("PlayerBGames")
 }
-model Game {
-  id Int @id @default(autoincrement())
-  firstPlayerId String 
-  secondPlayerId String
-  winnerId String?
-  category Category
-  tie Boolean
-  firstPlayer  User @relation("FirstPlayerGames", fields: [firstPlayerId], references: [id], onDelete: Cascade)
-  secondPlayer User @relation("SecondPlayerGames", fields: [secondPlayerId], references: [id], onDelete: Cascade)
-  winner       User? @relation("WinnerGames", fields: [winnerId], references: [id], onDelete: SetNull)
-  gameRound    GameRound[]
-  }
-  
-enum QuestionStatus {
-Passed
-Failed
-Skipped
-  }
-  model GameRound{
-  id Int @id @default(autoincrement())
-  gameId Int
-  questionId Int
-  questionStatus QuestionStatus
-  points Int
-  question Question @relation(fields: [questionId],references: [id])
-  game     Game     @relation(fields: [gameId],references: [id])
+model Rating {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category  Category
+  rating    Int      @default(1200)
+  gamesPlayed Int   @default(0)
 
+  @@unique([userId, category])
 }
 model Question {
   id                  Int       @id @default(autoincrement())
@@ -79,8 +50,45 @@ model Question {
   category            Category
   ratingBucket        Int
   correctAnswer       String
-  stepByStepSolution  String?   
-  imageUrl            String?   
-  round               GameRound[]
+  stepByStepSolution  String?
+  imageUrl            String?
+  
+  moves               GameMove[]
+
   @@index([category, ratingBucket])
+}
+
+model GameHistory {
+  id             Int       @id @default(autoincrement())
+  createdAt      DateTime  @default(now())
+  category       Category
+  timeControl    String    
+  playerAId              String?
+  playerA                User?      @relation("PlayerAGames", fields: [playerAId], references: [id], onDelete: SetNull)
+  playerARatingBefore    Int
+  playerARatingAfter     Int
+
+  playerBId              String?
+  playerB                User?      @relation("PlayerBGames", fields: [playerBId], references: [id], onDelete: SetNull)
+  playerBRatingBefore    Int
+  playerBRatingAfter     Int
+  winnerId     String?
+
+  moves        GameMove[]
+}
+
+model GameMove {
+  id           Int          @id @default(autoincrement())
+  
+  gameHistoryId Int
+  gameHistory  GameHistory  @relation(fields: [gameHistoryId], references: [id], onDelete: Cascade)
+
+  questionId   Int
+  question     Question     @relation(fields: [questionId], references: [id], onDelete: Cascade )
+  playerId     String
+  
+  status       AnswerStatus 
+  pointsGained Int          @default(0)
+  answerGiven  String?      
+  timeTakenMs  Int         
 }
