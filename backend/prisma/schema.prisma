@@ -29,6 +29,8 @@ model User {
   username  String    @unique
   email     String    @unique
   createdAt DateTime  @default(now())
+  rating_deviation Int @default(350)
+  volatility Decimal       @default(0.06)
   ratings   Rating[]
   stats     Json      @default("{\"highestWinStreaks\": {}, \"winLossRecords\": {}}")
   gamesAsPlayerA GameHistory[] @relation("PlayerAGames")
@@ -39,9 +41,9 @@ model Rating {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   category  Category
-  rating    Int      @default(1200)
+  rating    Int      @default(1500)
   gamesPlayed Int   @default(0)
-
+  lastUpdated DateTime @default(now())
   @@unique([userId, category])
 }
 model Question {
