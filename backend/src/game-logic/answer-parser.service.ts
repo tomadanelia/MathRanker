@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
-export class GameLogicService {
+export class AnswerParserService {
   constructor(private readonly prismaService: PrismaService) {}
 
   // Example method to demonstrate usage of PrismaService
