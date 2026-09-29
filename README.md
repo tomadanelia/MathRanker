@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Math Ranker is a short-form rated math duel app. The app uses Next.js App Router, TypeScript, pnpm, and a hosted Supabase project for Postgres and Auth. Game rules and answer checking will be server-authoritative; do not connect clients directly to protected game or question tables.
 
-## Getting Started
+## Development setup
 
-First, run the development server:
+1. Install dependencies with `pnpm install`.
+2. Create a hosted Supabase project. Local Supabase and Docker are not used.
+3. Copy `.env.example` to `.env.local` and enter the project's URL, anon key, and service-role key. Keep the service-role key server-side and out of source control.
+4. Start the app with `pnpm dev` and open `http://localhost:3000`.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Do not create or modify the schema manually in the Supabase dashboard; migrations are the source of truth.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Hosted migrations
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The repository contains migrations for the initial schema, matchmaking, answer submission, and a small starter question bank. To apply them to the intended hosted project:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Authenticate the Supabase CLI with an account that has access to the project: `pnpm dlx supabase login`.
+2. Link the project using its ref from the Supabase project URL: `pnpm dlx supabase link --project-ref <project-ref>`. The CLI also requires the project's database password; enter it only in the terminal prompt.
+3. Review pending changes with `pnpm dlx supabase migration list`.
+4. Apply pending migrations with `pnpm dlx supabase db push`.
 
-## Learn More
+The API keys in `.env.local` are not a substitute for the CLI access token or database password. Do not put either credential in the repository or share it in chat.
 
-To learn more about Next.js, take a look at the following resources:
+## Validation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `pnpm lint` runs ESLint.
+- `pnpm typecheck` runs TypeScript without emitting files.
+- `pnpm build` builds the Next.js app.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Hosted Supabase notes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Use the same hosted project for local development and deployment until a separate production setup is needed. Development signups and games therefore persist in that project. In Supabase Auth settings, set the local Site URL to `http://localhost:3000`, configure production redirect URLs before deployment, and disable email confirmation during development or configure SMTP. Supabase free projects may pause after a week of inactivity and need to be resumed from the dashboard.
