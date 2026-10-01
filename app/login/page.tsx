@@ -29,12 +29,13 @@ export default function LoginPage() {
           password,
           options: {
             data: { username: username.trim().toLowerCase() },
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
         });
         if (signupError) throw signupError;
         if (!data.session) {
-          setMessage("Check your email to confirm your account, then sign in.");
+          setMessage(
+            "No session was created. Check that email confirmation is disabled in Supabase Auth settings.",
+          );
         } else {
           router.push("/");
           router.refresh();
