@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import PlayerProfile from "./components/player-profile";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "../src/lib/api/client";
@@ -18,34 +19,6 @@ const timeControlEntries = Object.entries(timeControls) as [
   TimeControl,
   (typeof timeControls)[TimeControl],
 ][];
-
-const sampleLeaderboards: Record<
-  TimeControl,
-  Array<{ username: string; rating: number }>
-> = {
-  blitz: [
-    { username: "numberfox", rating: 2386 },
-    { username: "sum_sprinter", rating: 2261 },
-    { username: "primepulse", rating: 2184 },
-  ],
-  standard: [
-    { username: "proofpoint", rating: 2452 },
-    { username: "algebrakit", rating: 2310 },
-    { username: "squaredaway", rating: 2206 },
-  ],
-  rapid: [
-    { username: "quiet_theorem", rating: 2524 },
-    { username: "vectorviolet", rating: 2392 },
-    { username: "logic_lark", rating: 2278 },
-  ],
-};
-
-const categoryRatingOffsets: Record<string, number> = {
-  arithmetic: 0,
-  algebra: 34,
-  geometry: -21,
-  mixed: 12,
-};
 
 type MatchResponse =
   | { status: "matched"; gameId: string }
@@ -188,6 +161,9 @@ export default function HomeScreen() {
             <span className="muted">Checking session</span>
           ) : userEmail ? (
             <>
+              <Link className="text-button" href="#profile">
+                Profile
+              </Link>
               <span className="account-email">{userEmail}</span>
               <button className="text-button" onClick={signOut}>
                 Sign out
@@ -203,6 +179,7 @@ export default function HomeScreen() {
 
       <section className="home-layout">
         <div className="home-intro">
+          <PlayerProfile />
           <p className="eyebrow">
             <span className="live-dot" /> RANKED DUELS / SEASON 01
           </p>
@@ -291,7 +268,7 @@ export default function HomeScreen() {
           >
             <div className="rating-preview-heading">
               <span>RATINGS / {category.toUpperCase()}</span>
-              <span>{userEmail ? "YOUR ACCOUNT" : "SAMPLE PLAYERS"}</span>
+              <span>{userEmail ? "YOUR ACCOUNT" : "STARTING RATINGS"}</span>
             </div>
             <div className="rating-mode-grid">
               {timeControlEntries.map(([timeControl, details]) => (
@@ -315,25 +292,9 @@ export default function HomeScreen() {
                   <span className="personal-rating-caption">
                     {userEmail ? "your rating" : "starting rating"}
                   </span>
-                  <ol className="sample-leaderboard">
-                    {sampleLeaderboards[timeControl].map((player, index) => (
-                      <li key={player.username}>
-                        <span>{index + 1}</span>
-                        <b>{player.username}</b>
-                        <strong>
-                          {player.rating +
-                            (categoryRatingOffsets[category] ?? 0)}
-                        </strong>
-                      </li>
-                    ))}
-                  </ol>
                 </article>
               ))}
             </div>
-            <p className="sample-data-note">
-              Sample leaderboard names and ratings are illustrative, not live
-              players.
-            </p>
           </section>
 
           {error && (
