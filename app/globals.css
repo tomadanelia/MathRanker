@@ -61,9 +61,7 @@ button {
   background-color: var(--paper);
   background-image:
     radial-gradient(ellipse at 15% 20%, #be403024, transparent 45%),
-    radial-gradient(ellipse at 85% 65%, #e9ac4812, transparent 40%),
-    radial-gradient(circle, #f2c45d45 1px, transparent 1.5px);
-  background-size: auto, auto, 76px 76px;
+    radial-gradient(ellipse at 85% 65%, #e9ac4812, transparent 40%);
   padding: 0 5.5vw;
 }
 
