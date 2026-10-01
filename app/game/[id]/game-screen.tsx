@@ -14,15 +14,8 @@ import {
   timeControls,
   type TimeControl,
 } from "../../../src/lib/game/time-controls";
-import {
-  categoryRatingOffsets,
-  sampleLeaderboards,
-} from "../../../src/lib/game/sample-leaderboard";
-import {
-  PlayerAvatar,
-  useAvatar,
-  usePlayer,
-} from "../../components/player-profile";
+import { useAvatar, usePlayer } from "../../components/player-profile";
+import ResultLeaderboard from "./result-leaderboard";
 
 type GameSnapshot = {
   game: {
@@ -212,30 +205,6 @@ export default function GameScreen({ gameId }: { gameId: string }) {
       game.ratingAfter !== undefined
         ? Math.round(game.ratingAfter - game.ratingBefore)
         : null;
-    const mockPlayers = sampleLeaderboards[game.preset].map((entry) => ({
-      ...entry,
-      rating: entry.rating + (categoryRatingOffsets[game.category] ?? 0),
-      isPlayer: false,
-    }));
-    const ranking =
-      game.ratingAfter === null || game.ratingAfter === undefined
-        ? []
-        : [
-            ...mockPlayers,
-            {
-              username: player?.username ?? "You",
-              rating: Math.round(game.ratingAfter),
-              isPlayer: true,
-            },
-          ].sort((a, b) => b.rating - a.rating);
-    const oldPosition =
-      game.ratingBefore === null || game.ratingBefore === undefined
-        ? null
-        : 1 +
-          mockPlayers.filter((entry) => entry.rating > game.ratingBefore!)
-            .length;
-    const newPosition = ranking.findIndex((entry) => entry.isPlayer) + 1;
-    const positionDelta = oldPosition === null ? 0 : oldPosition - newPosition;
     return (
       <main className="game-shell">
         <header className="topbar">
@@ -296,61 +265,16 @@ export default function GameScreen({ gameId }: { gameId: string }) {
                 </p>
               </section>
             )}
-          {ranking.length > 0 && (
-            <section
-              className="result-leaderboard"
-              aria-labelledby="ranking-heading"
-            >
-              <div className="result-ranking-heading">
-                <div>
-                  <p className="eyebrow">DIVISION STANDINGS</p>
-                  <h2 id="ranking-heading">
-                    {timeControls[game.preset].label} board
-                  </h2>
-                </div>
-                <span>{game.category.toUpperCase()}</span>
-              </div>
-              <ol>
-                {ranking.map((entry, index) => (
-                  <li
-                    key={`${entry.username}-${entry.isPlayer ? "player" : index}`}
-                    className={entry.isPlayer ? "is-player" : ""}
-                  >
-                    <span className="ranking-position">{index + 1}</span>
-                    {entry.isPlayer ? (
-                      <PlayerAvatar
-                        username={entry.username}
-                        skinId={avatar.id}
-                        size={42}
-                      />
-                    ) : (
-                      <span className="ranking-mark" aria-hidden="true">
-                        {entry.username.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                    <strong>
-                      {entry.username}
-                      {entry.isPlayer && <small>YOU</small>}
-                    </strong>
-                    {entry.isPlayer && (
-                      <span
-                        className={`ranking-movement ${positionDelta > 0 ? "up" : positionDelta < 0 ? "down" : ""}`}
-                      >
-                        {positionDelta > 0
-                          ? `↑ ${positionDelta}`
-                          : positionDelta < 0
-                            ? `↓ ${Math.abs(positionDelta)}`
-                            : "—"}
-                      </span>
-                    )}
-                    <b>{entry.rating}</b>
-                  </li>
-                ))}
-              </ol>
-              <p className="sample-data-note">
-                Opponent names and ratings are illustrative.
-              </p>
-            </section>
+          {game.ratingAfter !== null && game.ratingAfter !== undefined && (
+            <ResultLeaderboard
+              key={game.id}
+              category={game.category}
+              preset={game.preset}
+              username={player?.username ?? "You"}
+              avatarId={avatar.id}
+              ratingBefore={game.ratingBefore ?? game.ratingAfter}
+              ratingAfter={game.ratingAfter}
+            />
           )}
           <Link className="primary-action" href="/">
             Return to lobby <span aria-hidden="true">↗</span>
