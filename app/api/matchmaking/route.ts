@@ -71,13 +71,10 @@ export async function GET() {
         queueEntry.rating + (Number.isFinite(ratingOffset) ? ratingOffset : 0),
       ),
     );
-    const botAccuracy = Number.isFinite(BOT_ACCURACY)
-      ? Math.min(1, Math.max(0, BOT_ACCURACY))
-      : 0.7;
     const plan = createBotPlan({
       questionCount: rules.questionCount,
       secondsPerQuestion: rules.secondsPerQuestion,
-      accuracy: botAccuracy,
+      accuracy: BOT_ACCURACY,
       botRating,
       difficulty: queueEntry.rating,
     });

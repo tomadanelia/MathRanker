@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createBotPlan, pickBotDisplayName } from "../src/lib/game/bot";
+import { BOT_ACCURACY, createBotPlan, pickBotDisplayName } from "../src/lib/game/bot";
 
 describe("pickBotDisplayName", () => {
   it("returns a believable username", () => {
@@ -12,7 +12,7 @@ describe("createBotPlan", () => {
     const plan = createBotPlan({
       questionCount: 10000,
       secondsPerQuestion: 30,
-      accuracy: 0.7,
+      accuracy: BOT_ACCURACY,
       botRating: 1500,
       difficulty: 1600,
     });
@@ -21,8 +21,8 @@ describe("createBotPlan", () => {
       plan.filter((entry) => entry.willBeCorrect).length / plan.length;
 
     expect(plan).toHaveLength(10000);
-    expect(accuracy).toBeGreaterThan(0.68);
-    expect(accuracy).toBeLessThan(0.72);
+    expect(accuracy).toBeGreaterThan(0.48);
+    expect(accuracy).toBeLessThan(0.52);
     expect(
       plan.every(
         (entry) =>
