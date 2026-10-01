@@ -355,7 +355,7 @@ export default function HomeScreen() {
                   {categories
                     .find((item) => item.slug === category)
                     ?.name.toLowerCase()}{" "}
-                  players · bot backup in 30 sec
+                  players · bot backup in 3 sec
                 </span>
               </div>
               <button
