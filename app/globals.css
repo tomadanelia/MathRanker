@@ -1,15 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #172b2a;
-  --paper: #f4f5ef;
-  --paper-deep: #e8ece4;
-  --line: #c9d0c7;
-  --muted: #687775;
-  --teal: #087c70;
-  --teal-dark: #075e56;
-  --coral: #ed704f;
-  --yellow: #e8c956;
+  color-scheme: dark;
+  --surface: #171321;
+  --surface-raised: #211a30;
+  --selected: #35264b;
+  --gold: #e7c582;
+  --ink: #f1eaf9;
+  --paper: #0d0b16;
+  --paper-deep: #221c34;
+  --line: #3f3355;
+  --muted: #b0a3c4;
+  --teal: #b794f6;
+  --teal-dark: #ccb2ff;
+  --coral: #f18c9e;
+  --yellow: #e7c582;
 }
 
 @theme inline {
@@ -55,9 +60,10 @@ button {
   min-height: 100vh;
   background-color: var(--paper);
   background-image:
-    linear-gradient(rgba(23, 43, 42, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(23, 43, 42, 0.035) 1px, transparent 1px);
-  background-size: 34px 34px;
+    radial-gradient(ellipse at 15% 20%, #6c3dad24, transparent 45%),
+    radial-gradient(ellipse at 85% 65%, #b794f612, transparent 40%),
+    radial-gradient(circle, #e7c58245 1px, transparent 1.5px);
+  background-size: auto, auto, 76px 76px;
   padding: 0 5.5vw;
 }
 
@@ -243,9 +249,10 @@ button {
 .match-panel,
 .auth-form {
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.75);
+  background: var(--surface);
   padding: clamp(24px, 3vw, 36px);
-  box-shadow: 9px 9px 0 rgba(23, 43, 42, 0.055);
+  box-shadow: 0 24px 70px #0005, inset 0 1px #e7c58218;
+  border-radius: 20px;
   animation: arrive 0.6s 0.08s ease-out both;
 }
 
@@ -300,7 +307,7 @@ legend,
   gap: 7px;
   padding: 0 10px;
   border: 1px solid var(--line);
-  background: white;
+  background: var(--surface-raised);
   cursor: pointer;
   text-align: left;
   font-size: 12px;
@@ -316,7 +323,7 @@ legend,
 }
 .category-option.is-selected {
   border-color: var(--teal);
-  background: #e4f0eb;
+  background: var(--selected);
 }
 .category-number {
   color: var(--muted);
@@ -341,14 +348,14 @@ legend,
   min-height: 58px;
   padding: 9px 12px;
   border: 1px solid var(--line);
-  background: white;
+  background: var(--surface-raised);
   cursor: pointer;
   text-align: left;
 }
 
 .segmented-control button.is-selected {
   border-color: var(--teal);
-  background: #e4f0eb;
+  background: var(--selected);
 }
 .segmented-control button span {
   font-size: 12px;
@@ -390,7 +397,7 @@ legend,
 .rating-mode-tile {
   min-width: 0;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface-raised);
   padding: 8px;
   transition:
     border-color 0.18s,
@@ -399,7 +406,7 @@ legend,
 
 .rating-mode-tile.is-active {
   border-color: var(--teal);
-  background: #e7f1eb;
+  background: var(--selected);
 }
 
 .rating-mode-title > strong {
@@ -434,9 +441,10 @@ legend,
   width: min(100%, 470px);
   margin: 0 0 32px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--surface);
   padding: 18px;
-  box-shadow: 6px 6px 0 rgba(23, 43, 42, 0.05);
+  box-shadow: 0 12px 40px #0003;
+  border-radius: 16px;
 }
 
 .profile-identity {
@@ -491,7 +499,7 @@ legend,
   min-width: 125px;
   gap: 9px;
   border: 1px solid var(--line);
-  background: white;
+  background: var(--surface-raised);
   padding: 7px;
   cursor: pointer;
   font-size: 11px;
@@ -499,7 +507,7 @@ legend,
 
 .avatar-options button[aria-pressed="true"] {
   border-color: var(--teal);
-  background: #e4f0eb;
+  background: var(--selected);
   box-shadow: inset 0 -2px var(--teal);
 }
 
@@ -590,8 +598,8 @@ legend,
   align-items: center;
   gap: 11px;
   min-height: 58px;
-  border: 1px solid #9dbeb2;
-  background: #e6f0e9;
+  border: 1px solid var(--line);
+  background: var(--selected);
   padding: 8px 11px;
 }
 
@@ -617,7 +625,7 @@ legend,
 .search-orbit {
   width: 26px;
   height: 26px;
-  border: 2px solid #9fc7b9;
+  border: 2px solid var(--line);
   border-top-color: var(--coral);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -629,7 +637,7 @@ legend,
   line-height: 1.5;
 }
 .inline-error {
-  color: #a1392b;
+  color: var(--coral);
 }
 .inline-success {
   color: var(--teal-dark);
@@ -701,7 +709,7 @@ legend,
   min-height: 45px;
   border: 1px solid var(--line);
   outline: none;
-  background: white;
+  background: var(--surface-raised);
   padding: 0 12px;
   color: var(--ink);
   font-size: 13px;
@@ -709,7 +717,7 @@ legend,
 .auth-form input:focus,
 .answer-input-label input:focus {
   border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(8, 124, 112, 0.12);
+  box-shadow: 0 0 0 3px rgba(183, 148, 246, 0.18);
 }
 .auth-switch {
   display: flex;
@@ -962,7 +970,7 @@ legend,
   min-height: 54px;
   gap: 12px;
   border: 1px solid var(--line);
-  background: white;
+  background: var(--surface-raised);
   padding: 9px 12px;
   cursor: pointer;
   text-align: left;
@@ -981,15 +989,15 @@ legend,
 .choice-button:hover,
 .choice-button.is-selected {
   border-color: var(--teal);
-  background: #e5f0eb;
+  background: var(--selected);
 }
 .answer-wait {
   display: flex;
   align-items: center;
   gap: 13px;
   max-width: 470px;
-  border: 1px solid #9dbeb2;
-  background: #e6f0e9;
+  border: 1px solid var(--line);
+  background: var(--selected);
   padding: 14px;
 }
 .submitted-check {
@@ -1061,7 +1069,7 @@ legend,
   margin: 12px 0 32px;
   overflow: hidden;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--surface);
   padding: 23px 25px 18px;
   animation: reward-arrive 0.7s cubic-bezier(0.2, 0.85, 0.3, 1.25) both;
 }
@@ -1096,7 +1104,7 @@ legend,
 }
 
 .rating-down .reward-rating {
-  color: #a94c36;
+  color: var(--coral);
 }
 
 .rating-change-line {
@@ -1120,7 +1128,7 @@ legend,
 }
 
 .rating-down .rating-delta-value {
-  color: #a94c36;
+  color: var(--coral);
 }
 
 .reward-caption {
@@ -1133,7 +1141,7 @@ legend,
   width: 100%;
   margin: 4px 0 30px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--surface);
   scroll-margin-top: 18px;
 }
 
@@ -1184,7 +1192,7 @@ legend,
   height: 62px;
   border-bottom: 1px solid var(--line);
   padding: 9px 22px;
-  background: white;
+  background: var(--surface-raised);
   position: relative;
 }
 
@@ -1225,7 +1233,7 @@ legend,
 .ranking-controls > span { flex: 1; }
 .ranking-controls button {
   border: 1px solid var(--line);
-  background: white;
+  background: var(--surface-raised);
   color: var(--ink);
   padding: 6px 9px;
   cursor: pointer;
@@ -1241,7 +1249,7 @@ legend,
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(110deg, transparent 25%, #ffffff80 50%, transparent 75%);
+  background: linear-gradient(110deg, transparent 25%, #b794f626 50%, transparent 75%);
   animation: ranking-shimmer 2.8s ease-in-out infinite;
 }
 
@@ -1250,15 +1258,15 @@ legend,
 }
 
 @keyframes ranking-glow {
-  50% { box-shadow: inset 4px 0 var(--teal), inset 0 0 24px #53b79766; }
+  50% { box-shadow: inset 4px 0 var(--teal), inset 0 0 24px #b794f633; }
 }
 @keyframes ranking-shimmer {
   from { translate: -100% 0; }
   to { translate: 100% 0; }
 }
 @keyframes ranking-land {
-  0%, 35% { background: #fff1b5; box-shadow: inset 4px 0 var(--teal), inset 0 0 22px #eec85a88; }
-  100% { background: #dcece6; }
+  0%, 35% { background: #443451; box-shadow: inset 4px 0 var(--teal), inset 0 0 22px #eec85a88; }
+  100% { background: var(--selected); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1269,7 +1277,7 @@ legend,
 }
 
 .result-leaderboard li.is-player {
-  background: #dcece6;
+  background: var(--selected);
   box-shadow: inset 4px 0 var(--teal);
   z-index: 1;
 }
@@ -1320,7 +1328,7 @@ legend,
 }
 
 .ranking-movement.up { color: var(--teal-dark); }
-.ranking-movement.down { color: #a94c36; }
+.ranking-movement.down { color: var(--coral); }
 .result-leaderboard .sample-data-note { margin: 10px 22px; }
 
 @keyframes arrive {
@@ -1501,5 +1509,86 @@ legend,
   .ranking-mark {
     width: 36px !important;
     height: 36px !important;
+  }
+}
+
+/* Arcane details shared by the lobby, player access and duel arena. */
+::selection { background: var(--selected); color: var(--gold); }
+:where(button, a, input):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+input::placeholder { color: #9687ac; }
+.wordmark { color: var(--gold); letter-spacing: 0.14em; }
+.wordmark-mark {
+  border: 1px solid #e7c58270;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #62438d, #292039);
+  color: var(--gold);
+  box-shadow: 0 0 20px #b794f625;
+}
+.home-intro h1, .auth-aside h1, .result-panel h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+}
+.home-intro h1 em, .auth-aside h1 em {
+  color: var(--gold);
+  text-shadow: 0 0 35px #e7c58220;
+}
+.panel-heading h2, .result-ranking-heading h2, .profile-identity h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.panel-index, .intro-stats strong { color: var(--gold); }
+.grid-stamp {
+  border: 1px solid #e7c58250;
+  border-radius: 50%;
+  padding: 12px;
+  box-shadow: 0 0 35px #b794f618;
+}
+.grid-stamp span { border-color: #e7c58225; color: var(--gold); }
+.category-option, .segmented-control button, .rating-mode-tile,
+.avatar-options button, .choice-button, .ranking-controls button,
+.auth-form input, .answer-input-label input { border-radius: 9px; }
+.category-option.is-selected, .segmented-control button.is-selected,
+.rating-mode-tile.is-active, .choice-button.is-selected {
+  box-shadow: inset 0 0 18px #b794f610;
+}
+.primary-action {
+  border: 1px solid #cfacf66b;
+  border-radius: 10px;
+  background: linear-gradient(115deg, #7650ad, #573782);
+  color: #fff5ff;
+  box-shadow: 0 5px 24px #8c55ce22;
+}
+.primary-action:hover:not(:disabled) {
+  background: linear-gradient(115deg, #8960c2, #694395);
+  box-shadow: 0 5px 28px #8c55ce40;
+}
+.waiting-state, .answer-wait, .rating-reward { border-radius: 12px; }
+.submitted-check { background: #62438d; border-radius: 50%; }
+.live-dot { background: var(--gold); box-shadow: 0 0 12px #e7c58260; }
+.question-stage {
+  background: linear-gradient(145deg, #20192e, #14101e);
+  border-color: #67517f;
+  box-shadow: 0 20px 70px #0005, 0 0 50px #b794f60a, inset 0 1px #e7c58220;
+}
+.timer-row { border-bottom: 1px solid var(--line); padding-bottom: 18px; }
+.timer { text-shadow: 0 0 22px #b794f635; }
+.progress-track { border-radius: 8px; overflow: hidden; }
+.progress-track span { background: linear-gradient(90deg, #7650ad, var(--gold)); }
+.duel-sprite { filter: drop-shadow(0 0 20px #b794f630); }
+.duel-fighter-opponent .duel-sprite { filter: drop-shadow(0 0 20px #f18c9e25); }
+.duel-correct-burst { background: #62438d; }
+.result-leaderboard { border-radius: 16px; overflow: hidden; }
+.result-leaderboard li > strong small { background: #62438d; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

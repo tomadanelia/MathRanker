@@ -68,13 +68,13 @@ export default function LoginPage() {
       </div>
       <section className="auth-layout">
         <div className="auth-aside">
-          <p className="eyebrow">THE NEXT MOVE IS YOURS</p>
+          <p className="eyebrow">YOUR JOURNEY STARTS HERE</p>
           <h1>
-            Make every
+            A little knowledge,
             <br />
-            <em>answer count.</em>
+            <em>a little magic.</em>
           </h1>
-          <p>Build your rating through quick, head-to-head math rounds.</p>
+          <p>Enter the arena, master your craft, and build your rating through math duels.</p>
           <div className="auth-equation" aria-hidden="true">
             x² + 2x + 1<br />
             <span>= (x + 1)²</span>

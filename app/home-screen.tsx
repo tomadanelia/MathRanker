@@ -181,16 +181,16 @@ export default function HomeScreen() {
         <div className="home-intro">
           <PlayerProfile />
           <p className="eyebrow">
-            <span className="live-dot" /> RANKED DUELS / SEASON 01
+            <span className="live-dot" /> THE ARCANE ARENA / SEASON 01
           </p>
           <h1>
-            Think fast.
+            Think like
             <br />
-            <em>Play sharp.</em>
+            <em>a wizard.</em>
           </h1>
           <p className="intro-copy">
-            One question at a time. Same clock, same challenge. Your rating
-            follows the work.
+            Turn knowledge into magic. Challenge a rival in a timed math duel
+            and rise through the ranks.
           </p>
           <div className="intro-stats">
             <div>
@@ -217,8 +217,8 @@ export default function HomeScreen() {
         <section className="match-panel" aria-labelledby="match-heading">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">FIND A MATCH</p>
-              <h2 id="match-heading">Set your round</h2>
+              <p className="eyebrow">ENTER THE ARENA</p>
+              <h2 id="match-heading">Prepare your duel</h2>
             </div>
             <span className="panel-index">01—02</span>
           </div>
