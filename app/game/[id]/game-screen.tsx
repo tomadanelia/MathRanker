@@ -335,119 +335,115 @@ export default function GameScreen({ gameId }: { gameId: string }) {
       <div className="progress-track">
         <span style={{ width: `${progress}%` }} />
       </div>
-      <section className="duel-arena" aria-label="Duel players">
+      <section className="duel-arena" aria-label="Live duel">
         <DuelAvatar
           key={`${game.id}-you`}
           name={player?.username ?? "You"}
           correctAnswers={snapshot.correctAnswers?.[game.side] ?? 0}
         />
-        <div className="duel-arena-center" aria-hidden="true">
-          <span>VS</span>
-          <p>THINK. SOLVE. CAST.</p>
-        </div>
+        <section className="question-stage">
+          <div className="timer-row">
+            <span className="eyebrow">TIME REMAINING</span>
+            <strong className={remaining <= 3 ? "timer urgent" : "timer"}>
+              {remaining.toString().padStart(2, "0")}
+              <small>s</small>
+            </strong>
+          </div>
+          <div className="question-content">
+            <p className="question-kicker">
+              {game.category.toUpperCase()} / QUESTION {game.currentPosition + 1}
+            </p>
+            {question?.imageUrl && (
+              <Image
+                className="question-image"
+                src={question.imageUrl}
+                alt="Question diagram"
+                width={1200}
+                height={800}
+                unoptimized
+              />
+            )}
+            <h1>{question?.body ?? "Preparing question…"}</h1>
+            {alreadyAnswered ? (
+              <div className="answer-wait">
+                <span className="submitted-check">✓</span>
+                <div>
+                  <strong>Answer locked</strong>
+                  <p>Waiting for your opponent…</p>
+                </div>
+              </div>
+            ) : (
+              <form className="answer-form" onSubmit={submit}>
+                {question?.type === "multiple_choice" && question.choices ? (
+                  <div className="choice-grid">
+                    {question.choices.map((choice, index) => (
+                      <button
+                        type="button"
+                        key={choice.id}
+                        className={`choice-button ${answer === choice.id ? "is-selected" : ""}`}
+                        aria-pressed={answer === choice.id}
+                        onClick={() =>
+                          setDraft({
+                            position: game.currentPosition,
+                            value: choice.id,
+                          })
+                        }
+                      >
+                        <span>{String.fromCharCode(65 + index)}</span>
+                        {choice.text ?? choice.id}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <label className="answer-input-label">
+                    Your answer
+                    <input
+                      autoFocus
+                      inputMode="decimal"
+                      value={answer}
+                      onChange={(event) =>
+                        setDraft({
+                          position: game.currentPosition,
+                          value: event.target.value,
+                        })
+                      }
+                      placeholder="Type a number or fraction"
+                      maxLength={50}
+                    />
+                  </label>
+                )}
+                {error && (
+                  <p className="inline-error" role="alert">
+                    {error}
+                  </p>
+                )}
+                <button
+                  className="primary-action submit-answer"
+                  disabled={busy || !answer.trim()}
+                >
+                  {busy
+                    ? "Submitting…"
+                    : remaining === 0
+                      ? "Lock timeout"
+                      : "Submit answer"}
+                  <span aria-hidden="true">↗</span>
+                </button>
+              </form>
+            )}
+            {snapshot.answerStatus?.[game.side === "a" ? "b" : "a"] &&
+              !alreadyAnswered && (
+                <p className="opponent-status">
+                  Opponent answered. Your clock is still running.
+                </p>
+              )}
+          </div>
+        </section>
         <DuelAvatar
           key={`${game.id}-opponent`}
           name={game.opponentName ?? (game.isBot ? "Bot" : "Opponent")}
           opponent
           correctAnswers={snapshot.correctAnswers?.[game.side === "a" ? "b" : "a"] ?? 0}
         />
-      </section>
-      <section className="question-stage">
-        <div className="timer-row">
-          <span className="eyebrow">TIME REMAINING</span>
-          <strong className={remaining <= 3 ? "timer urgent" : "timer"}>
-            {remaining.toString().padStart(2, "0")}
-            <small>s</small>
-          </strong>
-        </div>
-        <div className="question-content">
-          <p className="question-kicker">
-            {game.category.toUpperCase()} / QUESTION {game.currentPosition + 1}
-          </p>
-          {question?.imageUrl && (
-            <Image
-              className="question-image"
-              src={question.imageUrl}
-              alt="Question diagram"
-              width={1200}
-              height={800}
-              unoptimized
-            />
-          )}
-          <h1>{question?.body ?? "Preparing question…"}</h1>
-          {alreadyAnswered ? (
-            <div className="answer-wait">
-              <span className="submitted-check">✓</span>
-              <div>
-                <strong>Answer locked</strong>
-                <p>Waiting for your opponent…</p>
-              </div>
-            </div>
-          ) : (
-            <form className="answer-form" onSubmit={submit}>
-              {question?.type === "multiple_choice" && question.choices ? (
-                <div className="choice-grid">
-                  {question.choices.map((choice, index) => (
-                    <button
-                      type="button"
-                      key={choice.id}
-                      className={`choice-button ${answer === choice.id ? "is-selected" : ""}`}
-                      aria-pressed={answer === choice.id}
-                      onClick={() =>
-                        setDraft({
-                          position: game.currentPosition,
-                          value: choice.id,
-                        })
-                      }
-                    >
-                      <span>{String.fromCharCode(65 + index)}</span>
-                      {choice.text ?? choice.id}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <label className="answer-input-label">
-                  Your answer
-                  <input
-                    autoFocus
-                    inputMode="decimal"
-                    value={answer}
-                    onChange={(event) =>
-                      setDraft({
-                        position: game.currentPosition,
-                        value: event.target.value,
-                      })
-                    }
-                    placeholder="Type a number or fraction"
-                    maxLength={50}
-                  />
-                </label>
-              )}
-              {error && (
-                <p className="inline-error" role="alert">
-                  {error}
-                </p>
-              )}
-              <button
-                className="primary-action submit-answer"
-                disabled={busy || !answer.trim()}
-              >
-                {busy
-                  ? "Submitting…"
-                  : remaining === 0
-                    ? "Lock timeout"
-                    : "Submit answer"}
-                <span aria-hidden="true">↗</span>
-              </button>
-            </form>
-          )}
-          {snapshot.answerStatus?.[game.side === "a" ? "b" : "a"] &&
-            !alreadyAnswered && (
-              <p className="opponent-status">
-                Opponent answered. Your clock is still running.
-              </p>
-            )}
-        </div>
       </section>
       <footer className="game-footer">
         <span>SERVER-TIMED ROUND</span>
