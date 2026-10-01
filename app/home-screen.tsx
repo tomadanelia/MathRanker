@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "../src/lib/api/client";
+import { timeControls, type TimeControl } from "../src/lib/game/time-controls";
 import { createSupabaseBrowserClient } from "../src/lib/supabase/client";
 
 const categories = [
@@ -12,6 +13,39 @@ const categories = [
   { slug: "geometry", name: "Geometry", mark: "03" },
   { slug: "mixed", name: "Mixed", mark: "04" },
 ];
+
+const timeControlEntries = Object.entries(timeControls) as [
+  TimeControl,
+  (typeof timeControls)[TimeControl],
+][];
+
+const sampleLeaderboards: Record<
+  TimeControl,
+  Array<{ username: string; rating: number }>
+> = {
+  blitz: [
+    { username: "numberfox", rating: 2386 },
+    { username: "sum_sprinter", rating: 2261 },
+    { username: "primepulse", rating: 2184 },
+  ],
+  standard: [
+    { username: "proofpoint", rating: 2452 },
+    { username: "algebrakit", rating: 2310 },
+    { username: "squaredaway", rating: 2206 },
+  ],
+  rapid: [
+    { username: "quiet_theorem", rating: 2524 },
+    { username: "vectorviolet", rating: 2392 },
+    { username: "logic_lark", rating: 2278 },
+  ],
+};
+
+const categoryRatingOffsets: Record<string, number> = {
+  arithmetic: 0,
+  algebra: 34,
+  geometry: -21,
+  mixed: 12,
+};
 
 type MatchResponse =
   | { status: "matched"; gameId: string }
@@ -23,7 +57,11 @@ export default function HomeScreen() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [category, setCategory] = useState("arithmetic");
-  const [preset, setPreset] = useState<"blitz" | "standard">("blitz");
+  const [preset, setPreset] = useState<TimeControl>("blitz");
+  const [personalRatings, setPersonalRatings] = useState<
+    Partial<Record<TimeControl, number>>
+  >({});
+  const [loadedRatingKey, setLoadedRatingKey] = useState<string | null>(null);
   const [waiting, setWaiting] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +86,37 @@ export default function HomeScreen() {
       listener.subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (!userEmail) return;
+
+    let active = true;
+    const ratingKey = `${userEmail}:${category}`;
+    void api
+      .get<{
+        ratings: Array<{ preset: TimeControl; rating: number }>;
+      }>(`/ratings?category=${encodeURIComponent(category)}`)
+      .then(({ ratings }) => {
+        if (active) {
+          setPersonalRatings(
+            Object.fromEntries(
+              ratings.map((rating) => [rating.preset, rating.rating]),
+            ),
+          );
+          setLoadedRatingKey(ratingKey);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setPersonalRatings({});
+          setLoadedRatingKey(ratingKey);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [category, userEmail]);
 
   useEffect(() => {
     if (!waiting) return;
@@ -155,6 +224,10 @@ export default function HomeScreen() {
               <strong>10</strong>
               <span>questions / standard</span>
             </div>
+            <div>
+              <strong>10</strong>
+              <span>questions / rapid</span>
+            </div>
           </div>
           <div className="grid-stamp" aria-hidden="true">
             <span>+</span>
@@ -197,26 +270,71 @@ export default function HomeScreen() {
           <fieldset className="preset-picker" disabled={waiting || busy}>
             <legend>Match length</legend>
             <div className="segmented-control">
-              <button
-                type="button"
-                aria-pressed={preset === "blitz"}
-                className={preset === "blitz" ? "is-selected" : ""}
-                onClick={() => setPreset("blitz")}
-              >
-                <span>Blitz</span>
-                <small>5 × 10 sec</small>
-              </button>
-              <button
-                type="button"
-                aria-pressed={preset === "standard"}
-                className={preset === "standard" ? "is-selected" : ""}
-                onClick={() => setPreset("standard")}
-              >
-                <span>Standard</span>
-                <small>10 × 20 sec</small>
-              </button>
+              {timeControlEntries.map(([timeControl, details]) => (
+                <button
+                  key={timeControl}
+                  type="button"
+                  aria-pressed={preset === timeControl}
+                  className={preset === timeControl ? "is-selected" : ""}
+                  onClick={() => setPreset(timeControl)}
+                >
+                  <span>{details.label}</span>
+                  <small>{details.description}</small>
+                </button>
+              ))}
             </div>
           </fieldset>
+
+          <section
+            className="rating-preview"
+            aria-label="Ratings by time control"
+          >
+            <div className="rating-preview-heading">
+              <span>RATINGS / {category.toUpperCase()}</span>
+              <span>{userEmail ? "YOUR ACCOUNT" : "SAMPLE PLAYERS"}</span>
+            </div>
+            <div className="rating-mode-grid">
+              {timeControlEntries.map(([timeControl, details]) => (
+                <article
+                  key={timeControl}
+                  className={`rating-mode-tile ${preset === timeControl ? "is-active" : ""}`}
+                >
+                  <div className="rating-mode-title">
+                    <strong>{details.label}</strong>
+                    {preset === timeControl && <span>PLAYING</span>}
+                  </div>
+                  <strong className="personal-rating-value">
+                    {userEmail
+                      ? loadedRatingKey !== `${userEmail}:${category}`
+                        ? "..."
+                        : personalRatings[timeControl] === undefined
+                          ? "—"
+                          : Math.round(personalRatings[timeControl])
+                      : "1500"}
+                  </strong>
+                  <span className="personal-rating-caption">
+                    {userEmail ? "your rating" : "starting rating"}
+                  </span>
+                  <ol className="sample-leaderboard">
+                    {sampleLeaderboards[timeControl].map((player, index) => (
+                      <li key={player.username}>
+                        <span>{index + 1}</span>
+                        <b>{player.username}</b>
+                        <strong>
+                          {player.rating +
+                            (categoryRatingOffsets[category] ?? 0)}
+                        </strong>
+                      </li>
+                    ))}
+                  </ol>
+                </article>
+              ))}
+            </div>
+            <p className="sample-data-note">
+              Sample leaderboard names and ratings are illustrative, not live
+              players.
+            </p>
+          </section>
 
           {error && (
             <p className="inline-error" role="alert">

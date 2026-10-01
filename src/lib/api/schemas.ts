@@ -17,6 +17,7 @@ export const profileSchema = z.object({
 export const ratingSchema = z.object({
   user_id: z.string(),
   category: z.string(),
+  preset: z.enum(["blitz", "standard", "rapid"]),
   rating: z.number(),
   rd: z.number(),
   vol: z.number(),
@@ -35,7 +36,7 @@ export const matchmakingJoinSchema = z.object({
     .min(1)
     .max(40)
     .regex(/^[a-z0-9_-]+$/),
-  preset: z.enum(["blitz", "standard"]),
+  preset: z.enum(["blitz", "standard", "rapid"]),
 });
 
 export type Category = z.infer<typeof categorySchema>;

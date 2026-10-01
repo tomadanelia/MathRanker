@@ -10,11 +10,16 @@ import {
   type FormEvent,
 } from "react";
 import { api } from "../../../src/lib/api/client";
+import {
+  timeControls,
+  type TimeControl,
+} from "../../../src/lib/game/time-controls";
 
 type GameSnapshot = {
   game: {
     id: string;
     category: string;
+    preset: TimeControl;
     status: string;
     side: "a" | "b";
     isBot: boolean;
@@ -27,6 +32,8 @@ type GameSnapshot = {
     winner: "a" | "b" | "draw" | null;
     scoreA: number | null;
     scoreB: number | null;
+    ratingBefore: number | null;
+    ratingAfter: number | null;
   };
   question?: {
     id: string;
@@ -176,6 +183,13 @@ export default function GameScreen({ gameId }: { gameId: string }) {
 
   if (game?.status !== "active") {
     const won = game?.winner === game?.side;
+    const ratingDelta =
+      game?.ratingBefore !== null &&
+      game?.ratingBefore !== undefined &&
+      game.ratingAfter !== null &&
+      game.ratingAfter !== undefined
+        ? Math.round(game.ratingAfter - game.ratingBefore)
+        : null;
     return (
       <main className="game-shell">
         <header className="topbar">
@@ -201,6 +215,41 @@ export default function GameScreen({ gameId }: { gameId: string }) {
                 ? "You took this round."
                 : "Your next round is a fresh start."}
           </p>
+          {game &&
+            ratingDelta !== null &&
+            game.ratingBefore !== null &&
+            game.ratingAfter !== null && (
+              <section
+                className={`rating-reward ${ratingDelta >= 0 ? "rating-up" : "rating-down"}`}
+                aria-label="Rating change"
+              >
+                <span className="reward-spark" aria-hidden="true">
+                  ✦
+                </span>
+                <p className="eyebrow">
+                  {timeControls[game.preset].label.toUpperCase()} RATING
+                </p>
+                <strong className="reward-rating">
+                  {Math.round(game.ratingAfter)}
+                </strong>
+                <div className="rating-change-line">
+                  <span>{Math.round(game.ratingBefore)}</span>
+                  <span aria-hidden="true">→</span>
+                  <b>{Math.round(game.ratingAfter)}</b>
+                  <strong className="rating-delta-value">
+                    {ratingDelta > 0 ? "+" : ""}
+                    {ratingDelta}
+                  </strong>
+                </div>
+                <p className="reward-caption">
+                  {ratingDelta > 0
+                    ? "Rating increased"
+                    : ratingDelta < 0
+                      ? "Rating decreased"
+                      : "Rating held steady"}
+                </p>
+              </section>
+            )}
           <Link className="primary-action" href="/">
             Return to lobby <span aria-hidden="true">↗</span>
           </Link>

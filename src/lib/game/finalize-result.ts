@@ -14,7 +14,7 @@ export async function finalizeGameRating(gameId: string): Promise<boolean> {
   const { data: game, error: gameError } = await client
     .from("games")
     .select(
-      "category, status, player_a, player_b, is_bot, bot_display_rating, current_position, question_count, winner, score_a, score_b",
+      "category, preset, status, player_a, player_b, is_bot, bot_display_rating, current_position, question_count, winner, score_a, score_b",
     )
     .eq("id", gameId)
     .maybeSingle();
@@ -41,6 +41,7 @@ export async function finalizeGameRating(gameId: string): Promise<boolean> {
       .from("ratings")
       .select("user_id, rating, rd, vol")
       .eq("category", game.category)
+      .eq("preset", game.preset)
       .in("user_id", userIds);
 
     if (ratingsError) throw new Error("Could not load player ratings.");

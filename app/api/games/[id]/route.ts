@@ -33,7 +33,7 @@ export async function GET(
   const { data: initialGame, error: gameError } = await serviceClient
     .from("games")
     .select(
-      "id, category, preset, question_count, seconds_per_question, status, player_a, player_b, is_bot, bot_display_name, bot_display_rating, current_position, question_started_at, winner, score_a, score_b, created_at, finished_at",
+      "id, category, preset, question_count, seconds_per_question, status, player_a, player_b, is_bot, bot_display_name, bot_display_rating, current_position, question_started_at, winner, score_a, score_b, rating_a_before, rating_a_after, rating_b_before, rating_b_after, created_at, finished_at",
     )
     .eq("id", id)
     .maybeSingle();
@@ -82,7 +82,7 @@ export async function GET(
     const refreshedGame = await serviceClient
       .from("games")
       .select(
-        "id, category, preset, question_count, seconds_per_question, status, player_a, player_b, is_bot, bot_display_name, bot_display_rating, current_position, question_started_at, winner, score_a, score_b, created_at, finished_at",
+        "id, category, preset, question_count, seconds_per_question, status, player_a, player_b, is_bot, bot_display_name, bot_display_rating, current_position, question_started_at, winner, score_a, score_b, rating_a_before, rating_a_after, rating_b_before, rating_b_after, created_at, finished_at",
       )
       .eq("id", id)
       .maybeSingle();
@@ -114,7 +114,7 @@ export async function GET(
     const refreshed = await serviceClient
       .from("games")
       .select(
-        "id, category, preset, question_count, seconds_per_question, status, player_a, player_b, is_bot, bot_display_name, bot_display_rating, current_position, question_started_at, winner, score_a, score_b, created_at, finished_at",
+        "id, category, preset, question_count, seconds_per_question, status, player_a, player_b, is_bot, bot_display_name, bot_display_rating, current_position, question_started_at, winner, score_a, score_b, rating_a_before, rating_a_after, rating_b_before, rating_b_after, created_at, finished_at",
       )
       .eq("id", id)
       .maybeSingle();
@@ -144,6 +144,8 @@ export async function GET(
     winner: game.winner,
     scoreA: game.score_a,
     scoreB: game.score_b,
+    ratingBefore: side === "a" ? game.rating_a_before : game.rating_b_before,
+    ratingAfter: side === "a" ? game.rating_a_after : game.rating_b_after,
     createdAt: game.created_at,
     finishedAt: game.finished_at,
   };

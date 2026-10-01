@@ -3,6 +3,7 @@ import {
   answerRequestSchema,
   matchmakingJoinSchema,
 } from "../src/lib/api/schemas";
+import { timeControls } from "../src/lib/game/time-controls";
 
 describe("matchmakingJoinSchema", () => {
   it("accepts supported presets and category slugs", () => {
@@ -12,6 +13,19 @@ describe("matchmakingJoinSchema", () => {
         preset: "blitz",
       }).success,
     ).toBe(true);
+  });
+
+  it("accepts the rapid time control", () => {
+    expect(
+      matchmakingJoinSchema.safeParse({
+        category: "algebra",
+        preset: "rapid",
+      }).success,
+    ).toBe(true);
+    expect(timeControls.rapid).toMatchObject({
+      questionCount: 10,
+      secondsPerQuestion: 45,
+    });
   });
 
   it("rejects unknown presets and malformed category slugs", () => {

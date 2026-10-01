@@ -330,7 +330,7 @@ legend,
 
 .segmented-control {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 7px;
 }
 
@@ -357,6 +357,116 @@ legend,
 .segmented-control button small {
   color: var(--muted);
   font-size: 10px;
+}
+
+.rating-preview {
+  border-top: 1px solid var(--line);
+  margin-top: 4px;
+  padding-top: 13px;
+}
+
+.rating-preview-heading,
+.rating-mode-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.rating-preview-heading {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.rating-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.rating-mode-tile {
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 8px;
+  transition:
+    border-color 0.18s,
+    background 0.18s;
+}
+
+.rating-mode-tile.is-active {
+  border-color: var(--teal);
+  background: #e7f1eb;
+}
+
+.rating-mode-title > strong {
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+}
+
+.rating-mode-title > span {
+  color: var(--teal-dark);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 6px;
+  font-weight: 800;
+}
+
+.personal-rating-value {
+  display: block;
+  margin-top: 7px;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 23px;
+  line-height: 1;
+}
+
+.personal-rating-caption {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 8px;
+}
+
+.sample-leaderboard {
+  display: grid;
+  gap: 3px;
+  margin: 9px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sample-leaderboard li {
+  display: grid;
+  grid-template-columns: 9px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 3px;
+  color: var(--muted);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 7px;
+}
+
+.sample-leaderboard b {
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 8px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sample-leaderboard strong {
+  color: var(--teal-dark);
+  font-size: 7px;
+}
+
+.sample-data-note {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 8px;
 }
 
 .primary-action {
@@ -752,6 +862,82 @@ legend,
   color: var(--muted);
 }
 
+.rating-reward {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  width: min(100%, 390px);
+  margin: 12px 0 32px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.88);
+  padding: 23px 25px 18px;
+  animation: reward-arrive 0.7s cubic-bezier(0.2, 0.85, 0.3, 1.25) both;
+}
+
+.rating-reward .eyebrow {
+  margin: 0 0 8px;
+}
+
+.reward-spark {
+  position: absolute;
+  top: 12px;
+  right: 17px;
+  color: var(--yellow);
+  font-size: 22px;
+  animation: spark-turn 3s ease-in-out infinite;
+}
+
+.rating-up {
+  border-bottom: 3px solid var(--teal);
+}
+
+.rating-down {
+  border-bottom: 3px solid var(--coral);
+}
+
+.reward-rating {
+  color: var(--teal-dark);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 51px;
+  line-height: 1;
+  animation: rating-pop 0.65s 0.18s ease-out both;
+}
+
+.rating-down .reward-rating {
+  color: #a94c36;
+}
+
+.rating-change-line {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 9px;
+  color: var(--muted);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
+}
+
+.rating-change-line b {
+  color: var(--ink);
+}
+
+.rating-delta-value {
+  margin-left: 4px;
+  color: var(--teal-dark);
+  font-size: 13px;
+}
+
+.rating-down .rating-delta-value {
+  color: #a94c36;
+}
+
+.reward-caption {
+  margin: 8px 0 0 !important;
+  color: var(--muted);
+  font-size: 10px;
+}
+
 @keyframes arrive {
   from {
     opacity: 0;
@@ -773,6 +959,31 @@ legend,
   }
   to {
     width: 100%;
+  }
+}
+@keyframes reward-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(17px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes rating-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.78);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes spark-turn {
+  50% {
+    transform: rotate(35deg) scale(1.2);
   }
 }
 

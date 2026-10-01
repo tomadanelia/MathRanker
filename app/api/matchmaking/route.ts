@@ -4,13 +4,12 @@ import {
   createBotPlan,
   pickBotDisplayName,
 } from "../../../src/lib/game/bot";
+import {
+  timeControls,
+  type TimeControl,
+} from "../../../src/lib/game/time-controls";
 import { createSupabaseServerClient } from "../../../src/lib/supabase/server";
 import { createSupabaseServiceRoleClient } from "../../../src/lib/supabase/service-role";
-
-const presetRules = {
-  blitz: { questionCount: 5, secondsPerQuestion: 10 },
-  standard: { questionCount: 10, secondsPerQuestion: 20 },
-} as const;
 
 function errorResponse(code: string, message: string, status: number) {
   return Response.json({ error: { code, message } }, { status });
@@ -56,7 +55,7 @@ export async function GET() {
 
   const waitTimeMs = Date.now() - new Date(queueEntry.joined_at).getTime();
   if (waitTimeMs >= queueEntry.bot_after_ms) {
-    const rules = presetRules[queueEntry.preset as keyof typeof presetRules];
+    const rules = timeControls[queueEntry.preset as TimeControl];
     if (!rules) {
       return errorResponse(
         "matchmaking_unavailable",
@@ -76,7 +75,8 @@ export async function GET() {
       ? Math.min(1, Math.max(0, BOT_ACCURACY))
       : 0.7;
     const plan = createBotPlan({
-      ...rules,
+      questionCount: rules.questionCount,
+      secondsPerQuestion: rules.secondsPerQuestion,
       accuracy: botAccuracy,
       botRating,
       difficulty: queueEntry.rating,
@@ -141,6 +141,7 @@ export async function POST(request: Request) {
     .select("rating")
     .eq("user_id", user.id)
     .eq("category", parsed.data.category)
+    .eq("preset", parsed.data.preset)
     .maybeSingle();
 
   if (ratingError) {
