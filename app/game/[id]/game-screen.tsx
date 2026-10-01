@@ -16,6 +16,7 @@ import {
 } from "../../../src/lib/game/time-controls";
 import { useAvatar, usePlayer } from "../../components/player-profile";
 import ResultLeaderboard from "./result-leaderboard";
+import DuelAvatar from "./duel-avatar";
 import { prepareRankingSound } from "../../../src/lib/game/ranking-sound";
 
 type GameSnapshot = {
@@ -46,6 +47,7 @@ type GameSnapshot = {
     imageUrl: string | null;
   };
   answerStatus?: { a: boolean; b: boolean };
+  correctAnswers?: { a: number; b: number };
 };
 
 export default function GameScreen({ gameId }: { gameId: string }) {
@@ -333,6 +335,23 @@ export default function GameScreen({ gameId }: { gameId: string }) {
       <div className="progress-track">
         <span style={{ width: `${progress}%` }} />
       </div>
+      <section className="duel-arena" aria-label="Duel players">
+        <DuelAvatar
+          key={`${game.id}-you`}
+          name={player?.username ?? "You"}
+          correctAnswers={snapshot.correctAnswers?.[game.side] ?? 0}
+        />
+        <div className="duel-arena-center" aria-hidden="true">
+          <span>VS</span>
+          <p>THINK. SOLVE. CAST.</p>
+        </div>
+        <DuelAvatar
+          key={`${game.id}-opponent`}
+          name={game.opponentName ?? (game.isBot ? "Bot" : "Opponent")}
+          opponent
+          correctAnswers={snapshot.correctAnswers?.[game.side === "a" ? "b" : "a"] ?? 0}
+        />
+      </section>
       <section className="question-stage">
         <div className="timer-row">
           <span className="eyebrow">TIME REMAINING</span>

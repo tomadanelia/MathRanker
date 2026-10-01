@@ -185,9 +185,9 @@ export async function GET(
 
   const { data: moves, error: movesError } = await serviceClient
     .from("game_moves")
-    .select("side")
+    .select("side, position, is_correct")
     .eq("game_id", game.id)
-    .eq("position", game.current_position);
+    .lte("position", game.current_position);
 
   if (movesError) {
     return errorResponse(
@@ -207,8 +207,12 @@ export async function GET(
       imageUrl: question.image_url,
     },
     answerStatus: {
-      a: moves.some((move) => move.side === "a"),
-      b: moves.some((move) => move.side === "b"),
+      a: moves.some((move) => move.side === "a" && move.position === game.current_position),
+      b: moves.some((move) => move.side === "b" && move.position === game.current_position),
+    },
+    correctAnswers: {
+      a: moves.filter((move) => move.side === "a" && move.is_correct).length,
+      b: moves.filter((move) => move.side === "b" && move.is_correct).length,
     },
   });
 }
