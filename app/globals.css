@@ -1302,12 +1302,7 @@ legend,
   100% { background: var(--selected); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .result-leaderboard li.is-player,
-  .result-leaderboard li.is-player::after {
-    animation: none !important;
-  }
-}
+
 
 .result-leaderboard li.is-player {
   background: var(--selected);
