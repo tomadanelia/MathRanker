@@ -34,7 +34,8 @@ describe("demo ranking board", () => {
 
   it.each(["win", "loss", "draw"] as const)("keeps ranks contiguous and unique for a %s", (outcome) => {
     const rows = buildRankingBoard({ ...setup, ratingBefore: 1500, ratingAfter: 1501, outcome });
-    const finalRanks = rows.map((row) => row.afterRank);
+    const finalRanks = rows.map((row) => row.afterRank).sort((a, b) => a - b);
+    expect(rows.map((row) => row.beforeRank)).toEqual(finalRanks);
     expect(finalRanks).toEqual(rows.map((_, index) => finalRanks[0] + index));
     expect([...rows.map((row) => row.beforeRank)].sort((a, b) => a - b)).toEqual(finalRanks);
     expect(rows.filter((row) => row.isPlayer)).toHaveLength(1);

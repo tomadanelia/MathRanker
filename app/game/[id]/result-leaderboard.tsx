@@ -6,8 +6,8 @@ import { timeControls, type TimeControl } from "../../../src/lib/game/time-contr
 import { playRankingSound, prepareRankingSound } from "../../../src/lib/game/ranking-sound";
 import { PlayerAvatar } from "../../components/player-profile";
 
-const MOVE_DURATION_MS = 7000;
-const REVEAL_DELAY_MS = 1400;
+const MOVE_DURATION_MS = 3500;
+const REVEAL_DELAY_MS = 800;
 
 export default function ResultLeaderboard({
   category,
@@ -35,7 +35,7 @@ export default function ResultLeaderboard({
   });
   const player = rows.find((row) => row.isPlayer)!;
   const rankChange = player.beforeRank - player.afterRank;
-  const firstRank = rows[0].afterRank;
+  const firstRank = rows[0].beforeRank;
   const [progress, setProgress] = useState(rankChange === 0 ? 1 : -1);
   const [replay, setReplay] = useState(0);
   const [muted, setMuted] = useState(false);
@@ -72,7 +72,7 @@ export default function ResultLeaderboard({
     observer.observe(viewport);
 
     const animate = (now: number) => {
-      const skip = rankChange === 0 || reducedMotion.matches;
+      const skip = rankChange === 0 || (reducedMotion.matches && replay === 0);
       const running = visible && !document.hidden;
       if (running && lastTime !== undefined) elapsed += Math.min(now - lastTime, 100);
       lastTime = running ? now : undefined;
@@ -80,11 +80,6 @@ export default function ResultLeaderboard({
       // Smooth, deliberate travel; the same progress keeps the row in view on phones.
       const eased = fraction * fraction * (3 - 2 * fraction);
       setProgress(skip || elapsed >= REVEAL_DELAY_MS ? eased : -1);
-      const rank = player.beforeRank + (player.afterRank - player.beforeRank) * eased;
-      // Display ranks are in the thousands; scrolling uses local row positions.
-      // Begin near the bottom, then let the row rise through the visible window.
-      const anchor = rankChange > 0 ? 0.82 - 0.52 * eased : 0.82;
-      viewport.scrollTop = (rank - firstRank + 0.5) * 62 - viewport.clientHeight * anchor;
       if (running && !skip && elapsed >= REVEAL_DELAY_MS && !sounding && !mutedRef.current) {
         stopSound.current = playRankingSound(rankChange > 0, (1 - fraction) * MOVE_DURATION_MS);
         sounding = true;
@@ -103,6 +98,8 @@ export default function ResultLeaderboard({
       stopSound.current();
     };
   }, [rankChange, player.beforeRank, player.afterRank, firstRank, replay]);
+
+  const currentRank = player.beforeRank - rankChange * Math.max(0, progress);
 
   return (
     <section
@@ -129,7 +126,7 @@ export default function ResultLeaderboard({
           prepareRankingSound();
           setProgress(-1);
           setReplay((value) => value + 1);
-        }}>Replay</button>}
+        }}>Replay animation</button>}
       </div>
       <p className="ranking-status" role="status">
         {phase === "done"
@@ -137,46 +134,31 @@ export default function ResultLeaderboard({
           : `Updating standings: ${username} moves from rank ${player.beforeRank} to ${player.afterRank}.`}
       </p>
       <div className="ranking-viewport" ref={viewportRef}>
-      <ol aria-hidden={phase !== "done"}>
-        {rows.map((entry) => (
-          <li
-            key={entry.isPlayer ? "current-player" : `opponent-${entry.beforeRank}`}
-            className={entry.isPlayer ? "is-player" : ""}
-            style={{
-              transform: `translateY(${(entry.beforeRank - entry.afterRank) * 62 * (1 - Math.max(0, progress))}px)`,
-            }}
-          >
-            <span className="ranking-position">
-              #{Math.round(entry.beforeRank + (entry.afterRank - entry.beforeRank) * Math.max(0, progress))}
+        <ol
+          className="ranking-track"
+          aria-hidden="true"
+          style={{ transform: `translateY(${-(currentRank - firstRank) * 62}px)` }}
+        >
+          {rows.filter((entry) => !entry.isPlayer).map((entry, index) => (
+            <li key={entry.username}>
+              <span className="ranking-position">#{firstRank + index}</span>
+              <span className="ranking-mark">{entry.username.charAt(0).toUpperCase()}</span>
+              <strong>{entry.username}</strong>
+              <b>{Math.round(entry.rating)}</b>
+            </li>
+          ))}
+        </ol>
+        <ol className="ranking-player-overlay" aria-label="Your demo standing">
+          <li className="is-player">
+            <span className="ranking-position">#{Math.round(currentRank)}</span>
+            <PlayerAvatar username={username} skinId={avatarId} size={42} />
+            <strong>{username}<small>YOU</small></strong>
+            <span className={`ranking-movement ${rankChange > 0 ? "up" : rankChange < 0 ? "down" : ""}`}>
+              {rankChange > 0 ? `+${rankChange}` : rankChange < 0 ? `${rankChange}` : "0"}
             </span>
-            {entry.isPlayer ? (
-              <PlayerAvatar username={entry.username} skinId={avatarId} size={42} />
-            ) : (
-              <span className="ranking-mark" aria-hidden="true">
-                {entry.username.charAt(0).toUpperCase()}
-              </span>
-            )}
-            <strong>
-              {entry.username}
-              {entry.isPlayer && <small>YOU</small>}
-            </strong>
-            {entry.isPlayer && (
-              <span className={`ranking-movement ${rankChange > 0 ? "up" : rankChange < 0 ? "down" : ""}`}>
-                {rankChange > 0
-                  ? `↑ ${rankChange}`
-                  : rankChange < 0
-                    ? `↓ ${Math.abs(rankChange)}`
-                    : "—"}
-              </span>
-            )}
-            <b>
-              {entry.isPlayer && phase === "before"
-                ? Math.round(ratingBefore)
-                : Math.round(entry.rating)}
-            </b>
+            <b>{Math.round(phase === "before" ? ratingBefore : ratingAfter)}</b>
           </li>
-        ))}
-      </ol>
+        </ol>
       </div>
       <p className="sample-data-note">
         Demo ranks and opponents are simulated. Your rating is real.

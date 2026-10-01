@@ -11,7 +11,7 @@ export type RankingRow = {
 
 // Presentation-only demo ranks. Never use these to update a player's rating.
 const START_RANK = 5780;
-const PLAYERS_ABOVE = 14;
+const PLAYERS_ABOVE = 24;
 const PLAYERS_BELOW = 3;
 const WIN_CLIMB = 12;
 
@@ -51,6 +51,6 @@ export function buildRankingBoard({
     });
   }
 
-  // Demo order is intentional: the real rating delta does not constrain the climb.
-  return rows.sort((a, b) => a.afterRank - b.afterRank);
+  // Keep a stable sequence for the window moving behind the fixed player row.
+  return rows;
 }

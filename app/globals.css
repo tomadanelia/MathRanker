@@ -1076,10 +1076,26 @@ legend,
 }
 
 .ranking-viewport {
-  max-height: min(496px, 55svh);
-  overflow: auto;
-  overflow-anchor: none;
-  scroll-behavior: auto;
+  position: relative;
+  height: min(496px, 55svh);
+  min-height: 186px;
+  overflow: hidden;
+}
+
+.ranking-track {
+  position: absolute;
+  top: calc(100% - 62px);
+  left: 0;
+  right: 0;
+  will-change: transform;
+}
+
+.ranking-player-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
 }
 
 .ranking-controls {
