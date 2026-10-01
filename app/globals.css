@@ -780,6 +780,7 @@ legend,
 }
 .duel-arena {
   position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: minmax(120px, 190px) minmax(0, 680px) minmax(120px, 190px);
   align-items: center;
@@ -795,6 +796,43 @@ legend,
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+.duel-arena > .question-stage {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(145deg, #2b1c1680, #18110e80);
+}
+.duel-magic-light {
+  position: absolute;
+  z-index: -1;
+  left: 12%;
+  right: 12%;
+  top: calc(50% - 65px);
+  height: 100px;
+  display: flex;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  animation: duel-magic 2400ms ease-out 240ms;
+}
+.duel-magic-segment {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent);
+}
+.duel-magic-segment img {
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(0.65) contrast(3) saturate(1.8);
+}
+.duel-fighter-opponent .duel-magic-light {
+  transform: scaleX(-1);
+}
+@keyframes duel-magic {
+  0%, 100% { opacity: 0; }
+  8%, 90% { opacity: 1; }
 }
 .duel-fighter-label {
   display: grid;
@@ -831,13 +869,10 @@ legend,
   opacity: 1;
 }
 .is-casting .duel-sprite-frame {
-  animation: duel-frame 120ms step-end var(--frame-delay) 1;
+  animation: duel-frame var(--frame-duration) step-end var(--frame-delay) 1;
 }
 .is-casting .duel-sprite-frame-0 {
-  animation: duel-idle 720ms step-end 1;
-}
-.is-casting .duel-sprite-frame-4 {
-  animation-duration: 240ms;
+  animation: duel-idle 3000ms step-end 1;
 }
 .duel-fighter-score {
   z-index: 1;
@@ -870,7 +905,7 @@ legend,
 }
 @keyframes duel-idle {
   0% { opacity: 1; }
-  16.666% { opacity: 0; }
+  4% { opacity: 0; }
   100% { opacity: 1; }
 }
 @keyframes duel-correct {
@@ -1378,6 +1413,11 @@ legend,
   }
 }
 @media (max-width: 820px) {
+  .duel-magic-light {
+    top: 130px;
+    left: 18%;
+    right: 18%;
+  }
   .duel-arena {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
