@@ -1065,7 +1065,7 @@ legend,
 
 .result-leaderboard li {
   display: grid;
-  grid-template-columns: 30px 42px minmax(0, 1fr) 55px 60px;
+  grid-template-columns: 58px 42px minmax(0, 1fr) 55px 60px;
   align-items: center;
   gap: 12px;
   height: 62px;
@@ -1179,6 +1179,7 @@ legend,
 }
 
 .result-leaderboard li > b {
+  grid-column: 5;
   text-align: right;
 }
 
@@ -1355,7 +1356,7 @@ legend,
     grid-template-columns: 1fr;
   }
   .result-leaderboard li {
-    grid-template-columns: 22px 36px minmax(0, 1fr) 38px 48px;
+    grid-template-columns: 48px 36px minmax(0, 1fr) 38px 48px;
     gap: 7px;
     padding: 8px 10px;
   }

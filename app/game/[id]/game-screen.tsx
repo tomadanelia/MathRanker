@@ -233,6 +233,7 @@ export default function GameScreen({ gameId }: { gameId: string }) {
               avatarId={avatar.id}
               ratingBefore={game.ratingBefore ?? game.ratingAfter}
               ratingAfter={game.ratingAfter}
+              outcome={game.winner === "draw" ? "draw" : won ? "win" : "loss"}
             />
           )}
           <p className="eyebrow">FINAL SCORE</p>

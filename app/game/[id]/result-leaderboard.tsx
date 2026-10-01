@@ -16,6 +16,7 @@ export default function ResultLeaderboard({
   avatarId,
   ratingBefore,
   ratingAfter,
+  outcome,
 }: {
   category: string;
   preset: TimeControl;
@@ -23,16 +24,18 @@ export default function ResultLeaderboard({
   avatarId: string;
   ratingBefore: number;
   ratingAfter: number;
+  outcome: "win" | "loss" | "draw";
 }) {
   const rows = buildRankingBoard({
-    category,
     preset,
     username,
     ratingBefore,
     ratingAfter,
+    outcome,
   });
   const player = rows.find((row) => row.isPlayer)!;
   const rankChange = player.beforeRank - player.afterRank;
+  const firstRank = rows[0].afterRank;
   const [progress, setProgress] = useState(rankChange === 0 ? 1 : -1);
   const [replay, setReplay] = useState(0);
   const [muted, setMuted] = useState(false);
@@ -78,7 +81,10 @@ export default function ResultLeaderboard({
       const eased = fraction * fraction * (3 - 2 * fraction);
       setProgress(skip || elapsed >= REVEAL_DELAY_MS ? eased : -1);
       const rank = player.beforeRank + (player.afterRank - player.beforeRank) * eased;
-      viewport.scrollTop = (rank - 0.5) * 62 - viewport.clientHeight / 2;
+      // Display ranks are in the thousands; scrolling uses local row positions.
+      // Begin near the bottom, then let the row rise through the visible window.
+      const anchor = rankChange > 0 ? 0.82 - 0.52 * eased : 0.82;
+      viewport.scrollTop = (rank - firstRank + 0.5) * 62 - viewport.clientHeight * anchor;
       if (running && !skip && elapsed >= REVEAL_DELAY_MS && !sounding && !mutedRef.current) {
         stopSound.current = playRankingSound(rankChange > 0, (1 - fraction) * MOVE_DURATION_MS);
         sounding = true;
@@ -96,7 +102,7 @@ export default function ResultLeaderboard({
       document.removeEventListener("visibilitychange", onVisibilityChange);
       stopSound.current();
     };
-  }, [rankChange, player.beforeRank, player.afterRank, replay]);
+  }, [rankChange, player.beforeRank, player.afterRank, firstRank, replay]);
 
   return (
     <section
@@ -106,7 +112,7 @@ export default function ResultLeaderboard({
     >
       <div className="result-ranking-heading">
         <div>
-          <p className="eyebrow">DIVISION STANDINGS</p>
+          <p className="eyebrow">DEMO DIVISION STANDINGS</p>
           <h2 id="ranking-heading">{timeControls[preset].label} board</h2>
         </div>
         <span>{category.toUpperCase()}</span>
@@ -134,14 +140,14 @@ export default function ResultLeaderboard({
       <ol aria-hidden={phase !== "done"}>
         {rows.map((entry) => (
           <li
-            key={entry.isPlayer ? "current-player" : entry.username}
+            key={entry.isPlayer ? "current-player" : `opponent-${entry.beforeRank}`}
             className={entry.isPlayer ? "is-player" : ""}
             style={{
               transform: `translateY(${(entry.beforeRank - entry.afterRank) * 62 * (1 - Math.max(0, progress))}px)`,
             }}
           >
             <span className="ranking-position">
-              {phase === "done" ? entry.afterRank : entry.beforeRank}
+              #{Math.round(entry.beforeRank + (entry.afterRank - entry.beforeRank) * Math.max(0, progress))}
             </span>
             {entry.isPlayer ? (
               <PlayerAvatar username={entry.username} skinId={avatarId} size={42} />
@@ -173,7 +179,7 @@ export default function ResultLeaderboard({
       </ol>
       </div>
       <p className="sample-data-note">
-        Opponent names and ratings are illustrative.
+        Demo ranks and opponents are simulated. Your rating is real.
       </p>
     </section>
   );
