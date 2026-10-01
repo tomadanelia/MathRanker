@@ -903,10 +903,7 @@ legend,
   .duel-arena-center > span { font-size: 16px; }
   .duel-fighter-label strong { font-size: 11px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .is-casting .duel-sprite-frame { animation: none; }
-  .duel-correct-burst { animation-name: duel-correct-reduced; }
-}
+
 @keyframes duel-correct-reduced {
   0%, 90% { opacity: 1; transform: translateX(-50%); }
   100% { opacity: 0; transform: translateX(-50%); }
