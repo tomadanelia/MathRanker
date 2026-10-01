@@ -13,7 +13,7 @@ export type BotPlanInput = {
   random?: () => number;
 };
 
-export const BOT_ACCURACY = 0.5;
+export const BOT_ACCURACY = 0.1;
 
 export function pickBotDisplayName(): string {
   const names = [
