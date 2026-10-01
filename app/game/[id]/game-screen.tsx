@@ -16,6 +16,7 @@ import {
 } from "../../../src/lib/game/time-controls";
 import { useAvatar, usePlayer } from "../../components/player-profile";
 import ResultLeaderboard from "./result-leaderboard";
+import { prepareRankingSound } from "../../../src/lib/game/ranking-sound";
 
 type GameSnapshot = {
   game: {
@@ -59,6 +60,15 @@ export default function GameScreen({ gameId }: { gameId: string }) {
   const game = snapshot?.game;
   const alreadyAnswered = Boolean(game && snapshot?.answerStatus?.[game.side]);
   const answer = draft.position === game?.currentPosition ? draft.value : "";
+
+  useEffect(() => {
+    window.addEventListener("pointerdown", prepareRankingSound);
+    window.addEventListener("keydown", prepareRankingSound);
+    return () => {
+      window.removeEventListener("pointerdown", prepareRankingSound);
+      window.removeEventListener("keydown", prepareRankingSound);
+    };
+  }, []);
 
   const refresh = useCallback(async () => {
     const next = await api.get<GameSnapshot>(`/games/${gameId}`);
@@ -214,6 +224,17 @@ export default function GameScreen({ gameId }: { gameId: string }) {
           <span className="eyebrow">ROUND COMPLETE</span>
         </header>
         <section className="result-panel">
+          {game.ratingAfter !== null && game.ratingAfter !== undefined && (
+            <ResultLeaderboard
+              key={game.id}
+              category={game.category}
+              preset={game.preset}
+              username={player?.username ?? "You"}
+              avatarId={avatar.id}
+              ratingBefore={game.ratingBefore ?? game.ratingAfter}
+              ratingAfter={game.ratingAfter}
+            />
+          )}
           <p className="eyebrow">FINAL SCORE</p>
           <strong className="final-score">{score}</strong>
           <h1>
@@ -265,17 +286,6 @@ export default function GameScreen({ gameId }: { gameId: string }) {
                 </p>
               </section>
             )}
-          {game.ratingAfter !== null && game.ratingAfter !== undefined && (
-            <ResultLeaderboard
-              key={game.id}
-              category={game.category}
-              preset={game.preset}
-              username={player?.username ?? "You"}
-              avatarId={avatar.id}
-              ratingBefore={game.ratingBefore ?? game.ratingAfter}
-              ratingAfter={game.ratingAfter}
-            />
-          )}
           <Link className="primary-action" href="/">
             Return to lobby <span aria-hidden="true">↗</span>
           </Link>

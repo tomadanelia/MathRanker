@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { buildRankingBoard } from "../../../src/lib/game/ranking-board";
 import { timeControls, type TimeControl } from "../../../src/lib/game/time-controls";
+import { playRankingSound, prepareRankingSound } from "../../../src/lib/game/ranking-sound";
 import { PlayerAvatar } from "../../components/player-profile";
 
-const MOVE_DURATION_MS = 1200;
-const REVEAL_DELAY_MS = 550;
+const MOVE_DURATION_MS = 7000;
+const REVEAL_DELAY_MS = 1400;
 
 export default function ResultLeaderboard({
   category,
@@ -32,39 +33,75 @@ export default function ResultLeaderboard({
   });
   const player = rows.find((row) => row.isPlayer)!;
   const rankChange = player.beforeRank - player.afterRank;
-  const [phase, setPhase] = useState<"before" | "moving" | "done">(
-    rankChange === 0 ? "done" : "before",
-  );
+  const [progress, setProgress] = useState(rankChange === 0 ? 1 : -1);
+  const [replay, setReplay] = useState(0);
+  const [muted, setMuted] = useState(false);
+  const mutedRef = useRef(false);
+  const stopSound = useRef<() => void>(() => {});
   const boardRef = useRef<HTMLElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const phase = progress < 0 ? "before" : progress < 1 ? "moving" : "done";
 
   useEffect(() => {
-    if (rankChange === 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      // No distance to travel, or the visitor prefers less motion.
-      const frame = window.requestAnimationFrame(() => setPhase("done"));
-      return () => window.cancelAnimationFrame(frame);
-    }
+    const board = boardRef.current;
+    const viewport = viewportRef.current;
+    if (!board || !viewport) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    board.scrollIntoView({ behavior: "instant", block: "start" });
+    let visible = false;
+    let elapsed = 0;
+    let lastTime: number | undefined;
+    let sounding = false;
+    let frame: number;
+    const pauseSound = () => {
+      stopSound.current();
+      sounding = false;
+      lastTime = undefined;
+    };
+    const onVisibilityChange = () => {
+      if (document.hidden) pauseSound();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting && entry.intersectionRatio >= 0.5;
+      if (!visible) pauseSound();
+    }, { threshold: [0, 0.5] });
+    observer.observe(viewport);
 
-    let revealTimer: number;
-    let finishTimer: number;
-    const frame = window.requestAnimationFrame(() => {
-      boardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      revealTimer = window.setTimeout(() => {
-        setPhase("moving");
-        finishTimer = window.setTimeout(() => setPhase("done"), MOVE_DURATION_MS);
-      }, REVEAL_DELAY_MS);
-    });
-
+    const animate = (now: number) => {
+      const skip = rankChange === 0 || reducedMotion.matches;
+      const running = visible && !document.hidden;
+      if (running && lastTime !== undefined) elapsed += Math.min(now - lastTime, 100);
+      lastTime = running ? now : undefined;
+      const fraction = skip ? 1 : Math.max(0, Math.min(1, (elapsed - REVEAL_DELAY_MS) / MOVE_DURATION_MS));
+      // Smooth, deliberate travel; the same progress keeps the row in view on phones.
+      const eased = fraction * fraction * (3 - 2 * fraction);
+      setProgress(skip || elapsed >= REVEAL_DELAY_MS ? eased : -1);
+      const rank = player.beforeRank + (player.afterRank - player.beforeRank) * eased;
+      viewport.scrollTop = (rank - 0.5) * 62 - viewport.clientHeight / 2;
+      if (running && !skip && elapsed >= REVEAL_DELAY_MS && !sounding && !mutedRef.current) {
+        stopSound.current = playRankingSound(rankChange > 0, (1 - fraction) * MOVE_DURATION_MS);
+        sounding = true;
+      }
+      if ((!running || mutedRef.current) && sounding) {
+        stopSound.current();
+        sounding = false;
+      }
+      if (fraction < 1) frame = window.requestAnimationFrame(animate);
+    };
+    frame = window.requestAnimationFrame(animate);
     return () => {
       window.cancelAnimationFrame(frame);
-      window.clearTimeout(revealTimer);
-      window.clearTimeout(finishTimer);
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      stopSound.current();
     };
-  }, [rankChange]);
+  }, [rankChange, player.beforeRank, player.afterRank, replay]);
 
   return (
     <section
       ref={boardRef}
-      className="result-leaderboard"
+      className={`result-leaderboard is-${phase} ${rankChange > 0 ? "rank-gain" : ""}`}
       aria-labelledby="ranking-heading"
     >
       <div className="result-ranking-heading">
@@ -74,23 +111,34 @@ export default function ResultLeaderboard({
         </div>
         <span>{category.toUpperCase()}</span>
       </div>
+      <div className="ranking-controls">
+        <span>{phase === "before" ? "Your standing before the round" : phase === "moving" ? "Updating your rank..." : "Final standings"}</span>
+        <button type="button" aria-pressed={!muted} onClick={() => {
+          prepareRankingSound();
+          mutedRef.current = !muted;
+          setMuted(!muted);
+          if (!muted) stopSound.current();
+        }}>Sound {muted ? "off" : "on"}</button>
+        {rankChange !== 0 && <button type="button" onClick={() => {
+          prepareRankingSound();
+          setProgress(-1);
+          setReplay((value) => value + 1);
+        }}>Replay</button>}
+      </div>
       <p className="ranking-status" role="status">
         {phase === "done"
           ? `Final standing: ${username} is rank ${player.afterRank}.`
           : `Updating standings: ${username} moves from rank ${player.beforeRank} to ${player.afterRank}.`}
       </p>
-      <ol className={phase === "moving" ? "is-moving" : ""} aria-hidden={phase !== "done"}>
+      <div className="ranking-viewport" ref={viewportRef}>
+      <ol aria-hidden={phase !== "done"}>
         {rows.map((entry) => (
           <li
             key={entry.isPlayer ? "current-player" : entry.username}
             className={entry.isPlayer ? "is-player" : ""}
-            style={
-              phase === "before"
-                ? {
-                    transform: `translateY(${(entry.beforeRank - entry.afterRank) * 62}px)`,
-                  }
-                : undefined
-            }
+            style={{
+              transform: `translateY(${(entry.beforeRank - entry.afterRank) * 62 * (1 - Math.max(0, progress))}px)`,
+            }}
           >
             <span className="ranking-position">
               {phase === "done" ? entry.afterRank : entry.beforeRank}
@@ -123,6 +171,7 @@ export default function ResultLeaderboard({
           </li>
         ))}
       </ol>
+      </div>
       <p className="sample-data-note">
         Opponent names and ratings are illustrative.
       </p>
